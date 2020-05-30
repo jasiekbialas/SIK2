@@ -15,6 +15,10 @@
 #define PORT (int)'p'
 #define META (int)'m'
 #define TIMEOUT (int)'t'
+#define LOCAL_PORT (int)'P'
+#define MULTI (int)'B'
+#define LOCAL_TIMEOUT (int)'T'
+
 
 class parameters {
 public:
@@ -24,6 +28,9 @@ public:
     std::string get_port();
     bool get_meta();
     unsigned long get_timeout();
+    std::string get_local_port();
+//    bool get_multi();
+    unsigned long get_local_timeout();
 private:
     std::unordered_map<int, std::string> m;
     int check_flag(char* f);

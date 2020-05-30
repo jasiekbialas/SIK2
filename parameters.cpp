@@ -60,3 +60,9 @@ bool parameters::get_meta() {
 unsigned long parameters::get_timeout() {
     return stoul(m.find(TIMEOUT)->second);
 }
+std::string parameters::get_local_port() {
+    return m.find(LOCAL_PORT)->second;
+}
+unsigned long parameters::get_local_timeout() {
+    return stoul(m.find(TIMEOUT)->second);
+}

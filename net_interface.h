@@ -21,7 +21,10 @@
 
 class net_interface {
 public:
-    net_interface(std::string addr, std::string port, unsigned long timeout);
+    net_interface(std::string addr,
+            std::string port,
+            unsigned long timeout);
+    ~net_interface();
     void send_request(std::string request);
     std::string net_getline();
     size_t net_getchunk(uint8_t* buff, size_t size);

@@ -10,9 +10,7 @@ net_interface::net_interface(std::string addr, std::string port, unsigned long t
     int err;
     struct addrinfo addr_hints;
     struct addrinfo *addr_result;
-    struct timeval write_timeout, read_timeout;
-    write_timeout.tv_sec = timeout;
-    write_timeout.tv_usec = 0;
+    struct timeval read_timeout;
     read_timeout.tv_sec = timeout;
     read_timeout.tv_usec = 0;
 
@@ -37,21 +35,20 @@ net_interface::net_interface(std::string addr, std::string port, unsigned long t
         throw "socket error";
     }
 
-
     // connect socket to the server
     if (connect(sock, addr_result->ai_addr, addr_result->ai_addrlen) < 0) {
         freeaddrinfo(addr_result);
         throw "connect error";
     }
 
-
-    setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (void *)&write_timeout,
-               sizeof(write_timeout));
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&read_timeout,
                sizeof(read_timeout));
 
-
     freeaddrinfo(addr_result);
+}
+
+net_interface::~net_interface() {
+    close(sock);
 }
 
 void net_interface::send_request(std::string request) {
@@ -90,6 +87,8 @@ size_t net_interface::net_getchunk(uint8_t* buff, size_t size) {
         received = read(sock, buff + received_total, size - received_total);
         if (received < 0) {
             throw "partial / failed read";
+        } else if (received == 0) {
+            throw "stream closed";
         }
         received_total += received;
     };

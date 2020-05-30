@@ -15,10 +15,8 @@ regexps::regexps():
             std::regex_constants::ECMAScript | std::regex_constants::icase)
 {};
 
-
 connection_manager::connection_manager(net_interface interface):
 interface(interface), regexps() {};
-
 
 bool connection_manager::manage_headers() {
     std::string line;
@@ -40,7 +38,6 @@ bool connection_manager::manage_headers() {
     }
     return meta_present;
 }
-
 
 struct header connection_manager::parse_one_header(std::string line) {
     std::smatch pieces_match;
