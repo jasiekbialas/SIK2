@@ -6,6 +6,7 @@
 #include <iostream>
 #include "net_interface.h"
 
+
 net_interface::net_interface(std::string addr, std::string port, unsigned long timeout) {
     int err;
     struct addrinfo addr_hints;
@@ -23,7 +24,7 @@ net_interface::net_interface(std::string addr, std::string port, unsigned long t
     err = getaddrinfo(addr.c_str(), port.c_str(), &addr_hints, &addr_result);
 
     if (err != 0) { // other error (host not found, etc.)
-        throw "getaddrinfo";
+        throw std::runtime_error("getaddrinfo");
     }
 
     // initialize socket according to getaddrinfo results
@@ -32,13 +33,13 @@ net_interface::net_interface(std::string addr, std::string port, unsigned long t
 
     if (sock < 0) {
         freeaddrinfo(addr_result);
-        throw "socket error";
+        throw std::runtime_error("socket error");
     }
 
     // connect socket to the server
     if (connect(sock, addr_result->ai_addr, addr_result->ai_addrlen) < 0) {
         freeaddrinfo(addr_result);
-        throw "connect error";
+        throw std::runtime_error("connect error");
     }
 
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&read_timeout,
@@ -48,16 +49,18 @@ net_interface::net_interface(std::string addr, std::string port, unsigned long t
 }
 
 net_interface::~net_interface() {
+    std::cout<<"close"<<std::endl;
     close(sock);
 }
 
 void net_interface::send_request(std::string request) {
     ssize_t sent = 0, sent_total = 0;
-
     while (sent_total < request.size()) {
+
         sent = write(sock, request.c_str() + sent_total, request.size() - sent_total);
         if (sent < 0) {
-            throw "partial / failed write";
+            std::cout<<errno<<" "<<EAGAIN<<" - "<<EWOULDBLOCK<<std::endl;
+            throw std::runtime_error("partial / failed write");
         }
         sent_total += sent;
     };
@@ -71,7 +74,7 @@ std::string net_interface::net_getline() {
     while(true) {
         len = (int) read(sock, &c, 1);
         if(len != 1) {
-            throw "partial / failed read";
+            throw std::runtime_error("partial / failed read");
         }
         r.push_back(c);
         if(c == '\n' && last_was_r) return r;
@@ -80,15 +83,15 @@ std::string net_interface::net_getline() {
 }
 
 size_t net_interface::net_getchunk(uint8_t* buff, size_t size) {
-    if(size > BUFF_SIZE) size = BUFF_SIZE;
+
     ssize_t received = 0, received_total = 0;
 
     while (received_total < size) {
         received = read(sock, buff + received_total, size - received_total);
         if (received < 0) {
-            throw "partial / failed read";
+            throw std::runtime_error("partial / failed read");
         } else if (received == 0) {
-            throw "stream closed";
+            throw std::runtime_error("stream closed");
         }
         received_total += received;
     };

@@ -3,7 +3,6 @@
 //
 
 
-#include <iostream>
 #include "connection_manager.h"
 
 regexps::regexps():
@@ -15,24 +14,23 @@ regexps::regexps():
             std::regex_constants::ECMAScript | std::regex_constants::icase)
 {};
 
-connection_manager::connection_manager(net_interface interface):
-interface(interface), regexps() {};
+connection_manager::connection_manager(std::shared_ptr<net_interface> in): regexps() {
+    interface = in;
+}
 
 bool connection_manager::manage_headers() {
     std::string line;
     struct header h;
     bool meta_present = false;
     while(true) {
-        line = interface.net_getline();
+        line = interface -> net_getline();
         if(line == "\r\n") break;
 //        std::cout<<line;
         h = parse_one_header(line);
         if(h.type == header::METAINT) {
-            std::cout<<line;
             metaint = h.arg;
             meta_present = true;
         } else if(h.type == header::BR) {
-            std::cout<<line;
             br = h.arg;
         }
     }
@@ -55,28 +53,29 @@ struct header connection_manager::parse_one_header(std::string line) {
     return h;
 }
 
-void connection_manager::manage_stream() {
-    uint8_t buff[metaint];
-    while(true) {
-        interface.net_getchunk(buff, metaint);
-        write(STDOUT_FILENO, buff, metaint);
-        if(meta_present) {
-            interface.net_getchunk(buff, 1);
-            uint8_t k = buff[0];
-            interface.net_getchunk(buff, k*16);
-            write(STDERR_FILENO, buff, k*16);
-        }
-    }
+local_message connection_manager::get_audio() {
+    local_message message(metaint+4);
+    message.set_type(local_message::msg_type::AUDIO);
+    message.set_length(metaint);
+    size_t l = interface -> net_getchunk(message.get_body_pointer(), metaint);
+    return message;
+}
+
+local_message connection_manager::get_meta(){
+    uint8_t k;
+    interface -> net_getchunk(&k, 1);
+    local_message message(k*16 + 4);
+    message.set_length(k*16);
+    message.set_type(local_message::msg_type::METADATA);
+    interface -> net_getchunk(message.get_body_pointer(), k*16);
+
+    return message;
 }
 
 void connection_manager::start(std::string request, bool asking_for_meta) {
-    interface.send_request(request);
+    interface -> send_request(request);
     meta_present = manage_headers();
-    if(!asking_for_meta && meta_present) throw "unwanted meta";
-    manage_stream();
-
+    if(!asking_for_meta && meta_present) throw std::runtime_error("unwanted meta");
 }
 
 
-
-//void connection_manager::get_meta() {}

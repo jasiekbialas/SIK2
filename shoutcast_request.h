@@ -6,6 +6,7 @@
 #define ZADANIE2_HTTP_REQUEST_H
 
 #include <iostream>
+#include "parameters.h"
 
 
 class shoutcast_request {

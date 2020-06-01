@@ -8,23 +8,20 @@
 
 #include <string>
 #include <optional>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include "local_message.h"
+
 
 class local_interface {
 public:
-    enum msg_type {DISCOVER = 1, IAM = 2, KEEPALIVE = 3, AUDIO = 4, METADATA = 5};
-    struct msg {
-        msg_type type;
-        sockaddr addr;
-    };
-    local_interface(std::string port);
-    local_interface(std::string addr, std::string port);
+    bool receive_message(std::shared_ptr<local_message> msg);
+    void send_message(local_message msg);
     ~local_interface();
-    std::optional<struct msg> receive_message();
-private:
-    bool multicast = false;
-    struct ip_mreq ip_mreq;
+protected:
+    local_interface();
     int sock;
 };
-
 
 #endif //ZADANIE2_LOCAL_INTERFACE_H

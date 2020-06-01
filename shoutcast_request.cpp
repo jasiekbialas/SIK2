@@ -3,7 +3,7 @@
 //
 
 
-#include "parameters.h"
+
 #include "shoutcast_request.h"
 
 std::string shoutcast_request::to_string() {

@@ -17,8 +17,6 @@
 #include <cstring>
 #include <memory>
 
-#define BUFF_SIZE 16384
-
 class net_interface {
 public:
     net_interface(std::string addr,
@@ -30,6 +28,7 @@ public:
     size_t net_getchunk(uint8_t* buff, size_t size);
 private:
     int sock;
+
 };
 
 

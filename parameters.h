@@ -10,14 +10,7 @@
 #include <iostream>
 #include <cstring>
 
-#define HOST (int)'h'
-#define RESOURCE (int)'r'
-#define PORT (int)'p'
-#define META (int)'m'
-#define TIMEOUT (int)'t'
-#define LOCAL_PORT (int)'P'
-#define MULTI (int)'B'
-#define LOCAL_TIMEOUT (int)'T'
+
 
 
 class parameters {

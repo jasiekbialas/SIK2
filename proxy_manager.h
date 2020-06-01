@@ -13,16 +13,23 @@
 #include <cstring>
 #include <unordered_map>
 #include <sys/time.h>
-#include "local_interface.h"
+#include <netinet/in.h>
+#include <memory>
 
-static size_t sockaddr_to_num(const sockaddr s) {
-    uint64_t *r;
-    r = (uint64_t*)&s;
-    std::size_t c = *r;
-    return c;
+#include "local_server.h"
+
+static size_t sockaddr_to_num(const struct sockaddr s) {
+    size_t r = ((uint64_t)s.sa_family<<48) +
+            ((uint64_t)s.sa_data[0]<<40) +
+            ((uint64_t)s.sa_data[1]<<32) +
+            ((uint64_t)s.sa_data[2]<<24) +
+            ((uint64_t)s.sa_data[3]<<16) +
+            ((uint64_t)s.sa_data[4]<<8) +
+            ((uint64_t)s.sa_data[5]);
+    return r;
 }
 
-bool operator==(const sockaddr& lhs, const sockaddr& rhs) {
+static bool operator==(const struct sockaddr& lhs, const struct sockaddr& rhs) {
     return sockaddr_to_num(lhs) == sockaddr_to_num(rhs);
 }
 
@@ -36,35 +43,41 @@ namespace std {
     };
 }
 
+class no_time_exception: public std::exception {
+public:
+    no_time_exception() {};
+    virtual const char* what() const throw() {
+        return "Couldn't get time";
+    }
+};
+
 class proxy_manager {
 public:
-    proxy_manager(local_interface interface);
+    proxy_manager(std::shared_ptr<local_server> interface, size_t timeout);
     void handle_all_messages();
+    void send_out_message(local_message);
+
 private:
+    size_t timeout;
     enum client_status {POTENTIAL_CLIENT, CLIENT};
     struct client_data {
         enum client_status status;
         double timestamp;
     };
-    local_interface interface;
-    std::unordered_map<sockaddr, client_data, std::hash<sockaddr>> client_map;
+    std::shared_ptr<local_server> interface;
+    std::unordered_map<struct sockaddr, client_data, std::hash<sockaddr>> client_map;
     double start_time;
     bool handle_one_message();
 
-    static class no_time_exception: public std::exception
-    {
-        virtual const char* what() const throw()
-        {
-            return "Couldn't get time";
-        }
-    } time_exception;
+
 
     static double get_wall_time(){
         struct timeval time;
         if (gettimeofday(&time, nullptr)){
-            throw time_exception;
+            no_time_exception e;
+            throw e;
         }
-        
+
         return (double)time.tv_sec + (double)time.tv_usec * .000001;
     }
 

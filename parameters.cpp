@@ -4,6 +4,15 @@
 
 #include "parameters.h"
 
+#define HOST (int)'h'
+#define RESOURCE (int)'r'
+#define PORT (int)'p'
+#define META (int)'m'
+#define TIMEOUT (int)'t'
+#define LOCAL_PORT (int)'P'
+#define MULTI (int)'B'
+#define LOCAL_TIMEOUT (int)'T'
+
 
 int parameters::check_flag(char* f) {
     if(strlen(f) != 2) return -1;
@@ -21,7 +30,7 @@ bool parameters::check_number(std::string &nr) {
 
 parameters::parameters(int argc, char *argv[]) {
     if(argc % 2 == 0 || argc < 7) {
-        throw "Wrong number of arguments";
+        throw std::runtime_error("Wrong number of arguments");
     }
     std::string param;
     m.emplace(META, "yes");
@@ -32,16 +41,16 @@ parameters::parameters(int argc, char *argv[]) {
         m.emplace(check_flag(argv[i]), param);
     }
     auto it = m.find(HOST);
-    if(it == m.end()) throw "No HOST argument";
+    if(it == m.end()) throw std::runtime_error("No HOST argument");
     it = m.find(RESOURCE);
-    if(it == m.end()) throw "No RESURCE argument";
+    if(it == m.end()) throw std::runtime_error("No RESURCE argument");
     it = m.find(PORT);
-    if(it == m.end()) throw "No PORT argument";
-    if(!check_number(it->second)) throw "PORT should be a number";
+    if(it == m.end()) throw std::runtime_error("No PORT argument");
+    if(!check_number(it->second)) throw std::runtime_error("PORT should be a number");
     it = m.find(TIMEOUT);
-    if(!check_number(it->second)) throw "TIMEOUT should be a number";
+    if(!check_number(it->second)) throw std::runtime_error("TIMEOUT should be a number");
     it = m.find(META);
-    if(!check_meta(it->second)) throw "-m should be yes or no";
+    if(!check_meta(it->second)) throw std::runtime_error("-m should be yes or no");
 
 }
 
