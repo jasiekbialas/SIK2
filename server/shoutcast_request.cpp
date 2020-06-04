@@ -1,10 +1,5 @@
-//
-// Created by jasiek on 27.05.20.
-//
 
-
-
-#include "shoutcast_request.h"
+#include "server.h"
 
 std::string shoutcast_request::to_string() {
     std::string request;
