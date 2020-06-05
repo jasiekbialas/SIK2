@@ -38,3 +38,6 @@ std::string local_message::get_body_as_string() {
     }
     return s;
 }
+
+//void local_message::append(std::shared_ptr<local_message> msg {
+//}

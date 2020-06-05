@@ -26,20 +26,22 @@ radio_interface::radio_interface(std::string addr, std::string port, unsigned lo
     sock = socket(addr_result->ai_family, addr_result->ai_socktype, addr_result->ai_protocol);
 
     if (sock < 0) {
+        freeaddrinfo(addr_result);
         throw std::runtime_error("socket error");
     }
 
     // connect socket to the server
     if (connect(sock, addr_result->ai_addr, addr_result->ai_addrlen) < 0) {
         freeaddrinfo(addr_result);
+        close(sock);
         throw std::runtime_error("connect error");
     }
 
     freeaddrinfo(addr_result);
-
-    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *) &read_timeout, sizeof(read_timeout)) < 0)
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *) &read_timeout, sizeof(read_timeout)) < 0) {
+        close(sock);
         throw std::runtime_error("setsockopt");
-
+    }
 }
 
 radio_interface::~radio_interface() {

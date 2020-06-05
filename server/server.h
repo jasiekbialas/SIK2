@@ -84,7 +84,7 @@ private:
     unsigned long meta_left = 0;
     unsigned long received = 0;
 
-    std::string last_metadata = "";
+//    std::shared_ptr<local_message> last_meta;
 
     bool manage_headers();
     void parse_one_header(std::string line);
@@ -108,7 +108,8 @@ class server_manager {
 public:
     server_manager(
             std::shared_ptr<server_interface> interface,
-            std::string name, int timeout);
+            std::string name,
+            int timeout);
 
     void handle_all_messages();
     void send_out_message(std::shared_ptr<local_message>);

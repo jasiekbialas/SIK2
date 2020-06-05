@@ -39,6 +39,7 @@ public:
     struct sockaddr addr;
     size_t size;
     std::string get_body_as_string();
+//    void append(std::shared_ptr<local_message> msg);
 private:
     std::shared_ptr<uint8_t[]> buffer;
 };
@@ -92,6 +93,17 @@ static size_t get_wall_time(){
     }
 
     return (size_t)time.tv_sec * 1000 + (size_t)(time.tv_usec / 1000);
+}
+
+class sigint_exception : public std::exception {
+public:
+    const char * what () const throw () {
+        return "sigint";
+    }
+};
+
+static void handleSigInt(int s) {
+    throw sigint_exception();
 }
 
 #endif //SIK_DUZE_COMMON_H

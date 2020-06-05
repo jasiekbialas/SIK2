@@ -3,11 +3,9 @@
 
 client_manager::client_manager(
         std::shared_ptr<client_interface> in,
-        std::shared_ptr<user_interface> user_interface,
         int t
         ){
     interface = in;
-    usr_interface = user_interface;
     timeout = t;
 }
 
@@ -20,23 +18,24 @@ void client_manager::send(sockaddr addr, local_message::msg_type type) {
     if(type == local_message::msg_type::KEEPALIVE) last_sent_keep_alive = get_wall_time();
 }
 
-bool client_manager::handle_one_message(std::shared_ptr<local_message> buffer_msg) {
+void client_manager::handle_one_message(std::shared_ptr<local_message> buffer_msg) {
+    last_event = NOTHING;
     if(interface->receive_message(buffer_msg)) {
-//        std::cout<<"handle: t:"<<buffer_msg->get_type()<<std::endl;
-        std::string name, meta;
         switch(buffer_msg->get_type()) {
             case local_message::msg_type::IAM:
-                name = buffer_msg->get_body_as_string();
-//                std::cout<<"I AM: "<<name<<std::endl;
-                usr_interface->add_server(std::make_pair(buffer_msg->addr, name));
+                last_event = NEW_RADIO;
+                last_string_value = buffer_msg->get_body_as_string();
+                last_addr = buffer_msg->addr;
                 break;
+
             case local_message::msg_type::METADATA:
                 if(last_heard_from_playing != 0 && now_playing == buffer_msg->addr) {
                     last_heard_from_playing = get_wall_time();
-                    meta = buffer_msg->get_body_as_string();
-                    usr_interface->add_meta(meta);
+                    last_event = NEW_METADATA;
+                    last_string_value = buffer_msg->get_body_as_string();
                 }
                 break;
+
             case local_message::msg_type::AUDIO:
                 if(last_heard_from_playing != 0 && now_playing == buffer_msg->addr) {
                     last_heard_from_playing = get_wall_time();
@@ -44,10 +43,6 @@ bool client_manager::handle_one_message(std::shared_ptr<local_message> buffer_ms
                 }
                 break;
         }
-
-        return true;
-    } else {
-        return false;
     }
 }
 
@@ -59,12 +54,13 @@ void client_manager::change_playing(struct sockaddr addr) {
 }
 
 int client_manager::handle_time() {
+    last_event = NOTHING;
     if(last_heard_from_playing != 0) {
         size_t current = get_wall_time();
         size_t time_elapsed = current - last_heard_from_playing;
 
         if(time_elapsed > timeout) {
-            usr_interface->playing_gone();
+            last_event = PLAYING_GONE;
             last_heard_from_playing = 0;
         }
 
@@ -78,6 +74,5 @@ int client_manager::handle_time() {
 }
 
 void client_manager::send_discover_to_all() {
-//    std::cout<<"send"<<std::endl;
     send(interface->broadcast_addr, local_message::msg_type::DISCOVER);
 }

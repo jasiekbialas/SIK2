@@ -17,11 +17,21 @@ telnet_interface::telnet_interface(int sock) {
         throw telnet_error();
     }
 
-    fcntl(msg_sock, F_SETFL, O_NONBLOCK);
+    if(fcntl(msg_sock, F_SETFL, O_NONBLOCK) == -1) {
+        close(msg_sock);
+        throw std::runtime_error("fcntl");
+    };
+}
 
+ssize_t telnet_interface::send(const unsigned char* msg) {
+    return write(msg_sock, msg, sizeof(msg));
+}
+
+void telnet_interface::configure_telnet() {
     bool err = false;
 
     err = err || send(do_linemode) <= 0;
+
     err = err || send(linemode_options) <= 0;
     err = err || send(will_echo) <= 0;
     err = err || send(invisible_cursor) <= 0;
@@ -32,20 +42,11 @@ telnet_interface::telnet_interface(int sock) {
 }
 
 telnet_interface::~telnet_interface() {
-    shutdown(msg_sock, SHUT_WR);
-    char* buff[100];
-    while(read(msg_sock, buff, 100) > 0) {};
-    if(close(msg_sock) == -1) {
-        if(errno == EINTR) throw std::runtime_error("signal while close");
-    }
-}
-
-ssize_t telnet_interface::send(const unsigned char* msg) {
-    return write(msg_sock, msg, sizeof(msg));
+  close(msg_sock);
 }
 
 ssize_t telnet_interface::send(std::string msg) {
-    write(msg_sock, msg.c_str(), msg.size());
+    return write(msg_sock, msg.c_str(), msg.size());
 }
 
 bool telnet_interface::read_one(uint8_t &one) {
@@ -95,10 +96,12 @@ telnet_listen_sock::telnet_listen_sock(std::string port) {
     server_address.sin_port = htons((uint16_t)stol(port)); // listening on port PORT_NUM
 
     if (bind(sock, (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
-        throw std::runtime_error("bind l");
+        close(sock);
+        throw std::runtime_error("bind listen");
     }
 
     if (listen(sock, 1) < 0) {
+        close(sock);
         throw std::runtime_error("listen");
     }
 }

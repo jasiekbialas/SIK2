@@ -17,7 +17,6 @@ void user_interface::add_server(std::pair<struct sockaddr, std::string> server) 
         }
     }
     if(i == options.size()) options.push_back(server);
-    send_menu_out();
 }
 
 void user_interface::playing_gone() {
@@ -31,11 +30,11 @@ void user_interface::add_meta(std::string m) {
     meta = m;
 }
 
-void user_interface::send_menu_out() {
-    interface->send(clear);
+std::string user_interface::get_menu() {
     std::stringstream ss;
+    ss<<clear;
 
-    if(selected == 0) ss << green << "\r";
+    if(selected == 0) ss << green <<"\r";
     ss << szukaj;
     if(selected == 0) ss<<white;
     ss<<nl;
@@ -43,8 +42,10 @@ void user_interface::send_menu_out() {
     for(int i = 0; i < options.size(); i++) {
         auto [addr, name] = options[i];
         bool mark = selected-1 == i;
-        if(mark) ss << green << "\r";
+
+        if(mark) ss << green <<"\r";
         ss<<name;
+        if(playing == i) ss<<"*";
         if(mark) ss<<white;
         ss<<nl;
     }
@@ -53,14 +54,13 @@ void user_interface::send_menu_out() {
     ss<<koniec;
     if(selected == options.size() + 1) ss<<white;;
     ss<<nl;
-    interface->send(ss.str());
-
+    ss<<meta<<nl;
+    return ss.str();
 }
 
-user_interface::event user_interface::handle_input() {
+user_interface::event user_interface::handle_input(telnet_interface::input input) {
 
     auto r = NOTHING;
-    auto input = interface->get_input();
 
     switch(input) {
         case telnet_interface::input::UP:
@@ -70,18 +70,22 @@ user_interface::event user_interface::handle_input() {
             if(selected <= options.size()) selected++;
             break;
         case telnet_interface::input::CONFIRM:
-            if(selected == 0) r = SEARCH;
-            else if(selected <= options.size()) r = NEW_PLAYING;
+            if(selected == 0) {
+                r = SEARCH;
+                std::pair<struct sockaddr, std::string> playa;
+                if(playing >= 0) playa = options[playing];
+                options.clear();
+                if(playing >= 0) {
+                    options.push_back(playa);
+                    playing = 0;
+                }
+            }
+            else if(selected <= options.size()) {
+                r = NEW_PLAYING;
+                playing = selected-1;
+            }
             else r = END;
     }
-    if(r == SEARCH) {
-        std::pair<struct sockaddr, std::string> playa;
-        if(playing >= 0) playa = options[playing];
-        options.clear();
-        if(playing >= 0) options.push_back(playa);
-    }
-
-    send_menu_out();
     return r;
 }
 

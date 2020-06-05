@@ -37,5 +37,6 @@ client_interface::client_interface(std::string address, std::string port_local):
     addr_in.sin_port = htons((uint16_t) stol(port_local));
 
     freeaddrinfo(addr_result);
+
     broadcast_addr = *((struct sockaddr *) &addr_in);
 };

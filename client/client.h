@@ -33,6 +33,7 @@ public:
     ssize_t send(const unsigned char* msg);
     input get_input();
     bool read_one(uint8_t &one);
+    void configure_telnet();
     int msg_sock;
     class telnet_error : public std::exception {
     public:
@@ -52,36 +53,36 @@ public:
 class user_interface {
 public:
     enum event {SEARCH, END, NEW_PLAYING, NOTHING};
-    user_interface(std::shared_ptr<telnet_interface> in) {
-        interface = in;
-    };
     void add_server(std::pair<struct sockaddr, std::string> server);
     void playing_gone();
     void add_meta(std::string meta);
-    event handle_input();
+    event handle_input(telnet_interface::input input);
     struct sockaddr new_playing();
+    std::string get_menu();
+
 private:
     std::vector<std::pair<struct sockaddr, std::string>> options;
-    void send_menu_out();
     std::string meta = "";
     int playing = -1;
     int selected = 0;
-    std::shared_ptr<telnet_interface> interface;
 };
 
 
 class client_manager {
 public:
-    client_manager(std::shared_ptr<client_interface> interface, std::shared_ptr<user_interface> user_interface, int timeout);
+    enum event {PLAYING_GONE, NEW_RADIO, NEW_METADATA, NOTHING};
+    client_manager(std::shared_ptr<client_interface> interface, int timeout);
     void send_discover_to_all();
-    bool handle_one_message(std::shared_ptr<local_message> buffer_msg);
+    void handle_one_message(std::shared_ptr<local_message> buffer_msg);
     void change_playing(struct sockaddr addr);
     int handle_time();
+    event last_event;
+    std::string last_string_value;
+    struct sockaddr last_addr;
 private:
     void send(sockaddr addr, local_message::msg_type type);
 
     std::shared_ptr<client_interface> interface;
-    std::shared_ptr<user_interface> usr_interface;
     struct sockaddr now_playing;
 
     int timeout;

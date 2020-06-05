@@ -55,7 +55,7 @@ bool radio_manager::get_message(std::shared_ptr<local_message> message) {
             interface -> net_getchunk(&k, 1);
             msg_size = k*16;
             if(msg_size > 0) {
-                last_metadata = "";
+//                last_meta->set_length(0);
             }
             meta_left = msg_size;
             msg_type = local_message::msg_type::METADATA;
@@ -76,7 +76,7 @@ bool radio_manager::get_message(std::shared_ptr<local_message> message) {
         if(metaint > 0) {
             if(msg_type == local_message::msg_type::AUDIO) received += msg_size;
             if(msg_type == local_message::msg_type::METADATA) {
-                last_metadata.append(message->get_body_as_string());
+//                last_metadata.append(message->get_body_as_string());
                 meta_left -= msg_size;
             }
         }

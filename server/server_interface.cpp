@@ -41,7 +41,6 @@ server_interface::server_interface(std::string port, std::string multi):local_in
 
 server_interface::~server_interface(){
     if(multicast){
-        if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, (void*)&ip_mreq, sizeof ip_mreq) < 0)
-            throw std::runtime_error("setsockopt drop memberhsip");
+        setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, (void*)&ip_mreq, sizeof ip_mreq);
     }
 };

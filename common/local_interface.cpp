@@ -10,7 +10,10 @@ local_interface::local_interface() {
     if (sock < 0)
         throw std::runtime_error("socket");
 
-    fcntl(sock, F_SETFL, O_NONBLOCK);
+    if(fcntl(sock, F_SETFL, O_NONBLOCK) == -1) {
+        close(sock);
+        throw std::runtime_error("fcntl");
+    }
 }
 
 local_interface::~local_interface() {
