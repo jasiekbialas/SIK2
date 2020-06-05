@@ -91,6 +91,7 @@ user_interface::event user_interface::handle_input(telnet_interface::input input
 
 struct sockaddr user_interface::new_playing() {
     playing = selected-1;
+    meta = "";
     return options[selected-1].first;
 }
 

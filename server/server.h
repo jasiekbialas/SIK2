@@ -24,7 +24,7 @@
 
 #include <unordered_map>
 
-#include "common/common.h"
+#include "../common/common.h"
 
 #define MESSAGE_SIZE 4080
 #define MAX_MESSAGE_SIZE 65000
@@ -83,8 +83,6 @@ private:
     unsigned long metaint = 0;
     unsigned long meta_left = 0;
     unsigned long received = 0;
-
-//    std::shared_ptr<local_message> last_meta;
 
     bool manage_headers();
     void parse_one_header(std::string line);

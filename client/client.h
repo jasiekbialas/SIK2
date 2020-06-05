@@ -13,7 +13,7 @@
 #include <memory>
 #include <sstream>
 
-#include "common/common.h"
+#include "../common/common.h"
 
 #define KEEPALIVE_TIMEOUT 3500
 #define MAX_MESSAGE_SIZE 65500

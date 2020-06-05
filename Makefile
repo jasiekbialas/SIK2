@@ -3,33 +3,23 @@ CPPFLAGS = -g -std=c++17 -Wall -Wextra -O2
 LDFLAGS=-g
 LDLIBS=
 
-SRCS= local_message.cpp local_interface.cpp net_interface.cpp connection_manager.cpp proxy_manager.cpp parameters.cpp shoutcast_request.cpp
 
-OBJS=$(subst .cc,.o,$(SRCS))
 
-local_message.o: local_message.cpp local_message.h
+COMMON = ./common/parameters.cpp ./common/local_interface.cpp ./common/local_message.cpp
+SERVER = ./server/server.cpp ./server/shoutcast_request.cpp ./server/radio_interface.cpp ./server/radio_manager.cpp ./server/server_manager.cpp ./server/server_interface.cpp ./server/server_parameters.cpp $(COMMON)
+CLIENT = ./client/client.cpp ./client/client_interface.cpp ./client/client_manager.cpp ./client/user_interface.cpp ./client/telnet_interfaces.cpp ./client/client_parameters.cpp $(COMMON)
 
-local_interface.o: local_interface.cpp local_interface.h local_message.h
+all: radio-proxy radio-client
 
-net_interface.o: net_interface.cpp net_interface.h
+radio-proxy:  $(SERVER:%.cpp=%.o)
+	$(CXX) $(CPPFLAGS) -o radio-proxy $(SERVER:%.cpp=%.o)
 
-connection_manager.o: connection_manager.cpp connection_manager.h net_interface.h
-
-proxy_manager.o: proxy_manager.cpp proxy_manager.h local_interface.h
-
-parameters.o: parameters.cpp parameters.h
-
-shoutcast_request.o: shoutcast_request.cpp shoutcast_request.h parameters.h
-
-server.o: server.cpp local_message.h local_interface.h net_interface.h connection_manager.h proxy_manager.h parameters.h shoutcast_request.h
-
-client.o: server.cpp local_message.h local_interface.h net_interface.h connection_manager.h proxy_manager.h parameters.h shoutcast_request.h
-
-server: server.o $(OBJS)
-	$(CXX) $(CPPFLAGS) -o server server.o $(OBJS)
-
-client: client.o $(OBJS)
-	$(CXX) $(CPPFLAGS) -o client client.o $(OBJS)
+radio-client:  $(CLIENT:%.cpp=%.o)
+	$(CXX) $(CPPFLAGS) -o radio-client $(CLIENT:%.cpp=%.o)
 
 clean:
-	rm -f *.o $(TARGETS)
+	rm -f ./common/*.o
+	rm -f ./server/*.o
+	rm -f ./client/*.o
+	rm radio-proxy
+	rm radio-client

@@ -33,11 +33,11 @@ int main(int argc, char *argv[]) {
             }
             fds[1] = {server_int->sock, POLLIN, 0};
 
-            server_manager server_mgr(server_int, radio_mgr.name, params.get_timeout());
+            server_manager server_mgr(server_int, radio_mgr.name, params.get_local_timeout());
 
             bool send;
 
-            while(poll(fds, 2, params.get_timeout()) > 0) {
+            while(poll(fds, 2, params.get_timeout()) >= 0) {
 
                 send = radio_mgr.get_message(buffer);
                 server_mgr.handle_all_messages();
@@ -48,26 +48,34 @@ int main(int argc, char *argv[]) {
                 if(send) {
                     server_mgr.send_out_message(buffer);
                 }
+
+                check_sigint();
             }
         } else {
-            while(poll(fds, 2, (int)params.get_timeout()) > 0) {
+            while(poll(fds, 2, params.get_timeout()) > 0) {
+
                 if(radio_mgr.get_message(buffer)) {
                     if(buffer->get_type() == local_message::msg_type::AUDIO) {
-                        write(STDOUT_FILENO, buffer->get_body_pointer(), buffer->get_length());
+                        if(write(STDOUT_FILENO, buffer->get_body_pointer(), buffer->get_length()) <= 0) {
+                            break;
+                        };
                     }
                     if(buffer->get_type() == local_message::msg_type::METADATA) {
-                        write(STDERR_FILENO, buffer->get_body_pointer(), buffer->get_length());
+                        if(write(STDERR_FILENO, buffer->get_body_pointer(), buffer->get_length()) <=0 ) {
+                            break;
+                        };
                     }
                 }
+
+                check_sigint();
             }
         }
     } catch (sigint_exception &e) {
         return 0;
     } catch(std::exception &e) {
         std::cout<<"ERR: "<<e.what()<<std::endl;
-        return 1;
     }
-    return 0;
-}
 
-#pragma clang diagnostic pop
+    if(elo_elo_cos_signal_wlanelo) return 0;
+    return 1;
+}

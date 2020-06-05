@@ -15,6 +15,8 @@
 
 #include <sys/time.h>
 
+static bool elo_elo_cos_signal_wlanelo = false;
+
 class parameters {
 public:
     parameters(int argc, char *argv[]);
@@ -27,7 +29,7 @@ private:
 
 class local_message {
 public:
-    enum msg_type {DISCOVER = 1, IAM = 2, KEEPALIVE = 3, AUDIO = 4, METADATA = 5};
+    enum msg_type {DISCOVER = 1, IAM = 2, KEEPALIVE = 3, AUDIO = 4, METADATA = 6};
     local_message() {};
     local_message(size_t size);
     msg_type get_type();
@@ -39,7 +41,7 @@ public:
     struct sockaddr addr;
     size_t size;
     std::string get_body_as_string();
-//    void append(std::shared_ptr<local_message> msg);
+
 private:
     std::shared_ptr<uint8_t[]> buffer;
 };
@@ -102,8 +104,12 @@ public:
     }
 };
 
-static void handleSigInt(int s) {
-    throw sigint_exception();
+static void handleSigInt(__attribute__((unused)) int s) {
+    elo_elo_cos_signal_wlanelo = true;
+}
+
+static void check_sigint() {
+    if(elo_elo_cos_signal_wlanelo) throw sigint_exception();
 }
 
 #endif //SIK_DUZE_COMMON_H
