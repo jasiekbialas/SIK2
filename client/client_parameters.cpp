@@ -1,7 +1,7 @@
 
 #include "client.h"
 
-#define HOST (int)'h'
+#define HOST (int)'H'
 #define TELNET_PORT (int)'p'
 #define TIMEOUT (int)'t'
 #define LOCAL_PORT (int)'P'
