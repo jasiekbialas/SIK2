@@ -32,7 +32,7 @@ void server_manager::handle_all_messages() {
     auto it = client_map.begin();
 
     while(it != client_map.end()) {
-        if(current_time - it->second > timeout) {
+        if( ((int)(current_time - it->second)) > timeout) {
             it = client_map.erase(it);
         } else {
             it++;
@@ -44,8 +44,8 @@ void server_manager::send_out_message(std::shared_ptr<local_message> msg) {
     if(msg->get_type() == local_message::msg_type::METADATA) {
         std::cout<<"sending meta: "<<msg->get_body_as_string()<<std::endl;
     }
-    for(auto [addr, timestamp] : client_map) {
-            msg->addr = addr;
+    for(auto pair : client_map) {
+            msg->addr = pair.first;
             interface->send_message(msg);
     }
 }

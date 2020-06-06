@@ -63,8 +63,8 @@ public:
 private:
     std::vector<std::pair<struct sockaddr, std::string>> options;
     std::string meta = "";
-    int playing = -1;
-    int selected = 0;
+    ssize_t playing = -1;
+    size_t selected = 0;
 };
 
 

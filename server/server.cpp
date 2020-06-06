@@ -8,7 +8,7 @@
 #include "server.h"
 
 int main(int argc, char *argv[]) {
-    signal(SIGINT, handleSigInt);
+    signal(SIGINT, handle_sig_int);
     try {
         server_parameters params(argc, argv);
         shoutcast_request request(params);
@@ -76,6 +76,6 @@ int main(int argc, char *argv[]) {
         std::cout<<"ERR: "<<e.what()<<std::endl;
     }
 
-    if(elo_elo_cos_signal_wlanelo) return 0;
+    if(get_elo_elo_cos_signal_walenlo()) return 0;
     return 1;
 }

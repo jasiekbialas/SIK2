@@ -39,8 +39,17 @@ void client_manager::handle_one_message(std::shared_ptr<local_message> buffer_ms
             case local_message::msg_type::AUDIO:
                 if(last_heard_from_playing != 0 && now_playing == buffer_msg->addr) {
                     last_heard_from_playing = get_wall_time();
-                    write(STDOUT_FILENO, buffer_msg->get_body_pointer(), buffer_msg->get_length());
+                    if(buffer_msg->get_length() > 0) {
+                        if(write(STDOUT_FILENO, buffer_msg->get_body_pointer(), buffer_msg->get_length()) <= 0) {
+//                            std::cout<<buffer_msg->get_length()<<std::endl;
+//                            std::cout<<"errno: "<<errno<<std::endl;
+                            throw std::runtime_error("write here");
+                        }
+                    }
                 }
+                break;
+            case local_message::msg_type::DISCOVER:
+            case local_message::msg_type::KEEPALIVE:
                 break;
         }
     }
@@ -57,7 +66,7 @@ int client_manager::handle_time() {
     last_event = NOTHING;
     if(last_heard_from_playing != 0) {
         size_t current = get_wall_time();
-        size_t time_elapsed = current - last_heard_from_playing;
+        int time_elapsed = (int)(current - last_heard_from_playing);
 
         if(time_elapsed > timeout) {
             last_event = PLAYING_GONE;
@@ -68,7 +77,7 @@ int client_manager::handle_time() {
             send(now_playing, local_message::msg_type::KEEPALIVE);
         }
 
-        return timeout - (int)time_elapsed;
+        return timeout - time_elapsed;
     }
     return -1;
 }

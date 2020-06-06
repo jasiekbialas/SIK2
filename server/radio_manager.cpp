@@ -39,7 +39,7 @@ void radio_manager::parse_one_header(std::string line) {
 
 bool radio_manager::get_message(std::shared_ptr<local_message> message) {
     size_t current_time = get_wall_time();
-    if(current_time -last_read > timeout) {
+    if((int(current_time - last_read)) > timeout) {
         throw std::runtime_error("timeout");
     }
     last_read = current_time;

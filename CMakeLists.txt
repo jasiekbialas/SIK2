@@ -33,4 +33,4 @@ add_executable(client
         common/common.h
         common/parameters.cpp
         common/local_interface.cpp
-        common/local_message.cpp)
+        common/local_message.cpp common/common.cpp)

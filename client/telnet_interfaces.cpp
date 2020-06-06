@@ -31,7 +31,6 @@ void telnet_interface::configure_telnet() {
     bool err = false;
 
     err = err || send(do_linemode) <= 0;
-
     err = err || send(linemode_options) <= 0;
     err = err || send(will_echo) <= 0;
     err = err || send(invisible_cursor) <= 0;

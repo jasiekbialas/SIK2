@@ -3,9 +3,7 @@ CPPFLAGS = -g -std=c++17 -Wall -Wextra -O2
 LDFLAGS=-g
 LDLIBS=
 
-
-
-COMMON = ./common/parameters.cpp ./common/local_interface.cpp ./common/local_message.cpp
+COMMON = ./common/common.cpp ./common/parameters.cpp ./common/local_interface.cpp ./common/local_message.cpp
 SERVER = ./server/server.cpp ./server/shoutcast_request.cpp ./server/radio_interface.cpp ./server/radio_manager.cpp ./server/server_manager.cpp ./server/server_interface.cpp ./server/server_parameters.cpp $(COMMON)
 CLIENT = ./client/client.cpp ./client/client_interface.cpp ./client/client_manager.cpp ./client/user_interface.cpp ./client/telnet_interfaces.cpp ./client/client_parameters.cpp $(COMMON)
 

@@ -49,7 +49,9 @@ radio_interface::~radio_interface() {
 }
 
 void radio_interface::send_request(std::string request) {
-    ssize_t sent = 0, sent_total = 0;
+    ssize_t sent = 0;
+    size_t sent_total = 0;
+
     while (sent_total < request.size()) {
         sent = write(sock, request.c_str() + sent_total, request.size() - sent_total);
         if (sent < 0) {

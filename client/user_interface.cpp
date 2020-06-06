@@ -9,7 +9,7 @@ static std::string white = {27, '[', '3', '7', 'm'};
 static std::string clear = {27, '[', 'H', 27, '[', '0', 'J', '\r'};
 
 void user_interface::add_server(std::pair<struct sockaddr, std::string> server) {
-    int i = 0;
+    size_t i = 0;
     for(;i < options.size(); i++) {
         if(options[i].first == server.first) {
             options[i] = server;
@@ -39,13 +39,13 @@ std::string user_interface::get_menu() {
     if(selected == 0) ss<<white;
     ss<<nl;
 
-    for(int i = 0; i < options.size(); i++) {
-        auto [addr, name] = options[i];
-        bool mark = selected-1 == i;
+    for(size_t i = 0; i < options.size(); i++) {
+        auto name = options[i].second;
+        bool mark = selected == i+1;
 
         if(mark) ss << green <<"\r";
         ss<<name;
-        if(playing == i) ss<<"*";
+        if(playing == (ssize_t)i) ss<<"*";
         if(mark) ss<<white;
         ss<<nl;
     }
@@ -85,6 +85,8 @@ user_interface::event user_interface::handle_input(telnet_interface::input input
                 playing = selected-1;
             }
             else r = END;
+        case telnet_interface::input::OTHER:
+            break;
     }
     return r;
 }

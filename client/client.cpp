@@ -8,7 +8,8 @@
 #include "client.h"
 
 int main(int argc, char *argv[]) {
-    signal(SIGINT, handleSigInt);
+    signal(SIGINT, handle_sig_int);
+    bool eloelo = false;
     try {
 
         client_parameters params(argc, argv);
@@ -26,7 +27,7 @@ int main(int argc, char *argv[]) {
         client_manager client_mgr(client_int, client_timeout);
         user_interface user_int;
 
-        bool eloelo = false;
+
         int timeout = std::min(KEEPALIVE_TIMEOUT, client_timeout);
 
         std::string value;
@@ -77,7 +78,10 @@ int main(int argc, char *argv[]) {
                     case user_interface::event::END:
                         eloelo = true;
                         break;
+                    case user_interface::event::NOTHING:
+                        break;
                 }
+
                 if (eloelo) break;
 
                 client_mgr.handle_one_message(buffer_msg);
@@ -111,7 +115,9 @@ int main(int argc, char *argv[]) {
         }
     } catch (sigint_exception &e) {
         return 0;
-    } catch (std::exception &e) {}
-    if(elo_elo_cos_signal_wlanelo) return 0;
+    } catch (std::exception &e) {
+        std::cout<<"ERR: "<<e.what()<<std::endl;
+    }
+    if(get_elo_elo_cos_signal_walenlo() || eloelo) return 0;
     return 1;
 }

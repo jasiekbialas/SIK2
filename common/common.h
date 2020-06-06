@@ -15,7 +15,6 @@
 
 #include <sys/time.h>
 
-static bool elo_elo_cos_signal_wlanelo = false;
 
 class parameters {
 public:
@@ -55,20 +54,9 @@ public:
     int sock;
 };
 
-static size_t sockaddr_to_num(const struct sockaddr s) {
-    size_t r = ((uint64_t)s.sa_family<<48) +
-               ((uint64_t)s.sa_data[0]<<40) +
-               ((uint64_t)s.sa_data[1]<<32) +
-               ((uint64_t)s.sa_data[2]<<24) +
-               ((uint64_t)s.sa_data[3]<<16) +
-               ((uint64_t)s.sa_data[4]<<8) +
-               ((uint64_t)s.sa_data[5]);
-    return r;
-}
+size_t sockaddr_to_num(const struct sockaddr s);
 
-static bool operator==(const struct sockaddr& lhs, const struct sockaddr& rhs) {
-    return sockaddr_to_num(lhs) == sockaddr_to_num(rhs);
-}
+bool operator==(const struct sockaddr& lhs, const struct sockaddr& rhs);
 
 namespace std {
     template<> struct hash<struct sockaddr>
@@ -80,37 +68,18 @@ namespace std {
     };
 }
 
-class no_time_exception: public std::exception {
-public:
-    no_time_exception() {};
-    virtual const char* what() const throw() {
-        return "Couldn't get time";
-    }
-};
-
-static size_t get_wall_time(){
-    struct timeval time;
-    if (gettimeofday(&time, nullptr)){
-        throw no_time_exception();
-    }
-
-    return (size_t)time.tv_sec * 1000 + (size_t)(time.tv_usec / 1000);
-}
+size_t get_wall_time();
 
 class sigint_exception : public std::exception {
 public:
-    const char * what () const throw () {
-        return "sigint";
-    }
+    const char * what () const throw ();
 };
 
-static void handleSigInt(__attribute__((unused)) int s) {
-    elo_elo_cos_signal_wlanelo = true;
-}
+void handle_sig_int(__attribute__((unused)) int s);
 
-static void check_sigint() {
-    if(elo_elo_cos_signal_wlanelo) throw sigint_exception();
-}
+void check_sigint();
+
+bool get_elo_elo_cos_signal_walenlo();
 
 #endif //SIK_DUZE_COMMON_H
 
