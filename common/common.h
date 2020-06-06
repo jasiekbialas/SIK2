@@ -14,7 +14,7 @@
 #include <fcntl.h>
 
 #include <sys/time.h>
-
+#include <stdexcept>
 
 class parameters {
 public:
